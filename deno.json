@@ -1,0 +1,18 @@
+{
+  "imports": {
+    "@hono/hono": "jsr:@hono/hono@^4.12.18",
+    "zod": "npm:zod@^3.24.0",
+    "@google/generative-ai": "npm:@google/generative-ai@^0.21.0",
+    "bcrypt": "https://deno.land/x/bcrypt@v0.4.1/mod.ts",
+    "unpdf": "npm:unpdf@^0.12.0",
+    "xlsx": "npm:xlsx@^0.18.5"
+  },
+  "tasks": {
+    "start": "deno run -A --env main.ts",
+    "dev": "deno run -A --env --watch main.ts"
+  },
+  "compilerOptions": {
+    "jsx": "precompile",
+    "jsxImportSource": "hono/jsx"
+  }
+}
