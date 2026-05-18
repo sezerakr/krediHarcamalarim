@@ -1,0 +1,46 @@
+<div class="page-header">
+  <h1>Ekstrelerim</h1>
+  <a routerLink="/upload" class="upload-btn">Yeni Ekstre Yükle</a>
+</div>
+
+@if (statements.isLoading()) {
+  <div class="loading">Yükleniyor…</div>
+} @else if (statements.error()) {
+  <div class="error">Hata: ekstreler yüklenemedi.</div>
+} @else {
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Dosya Adı</th>
+          <th>Banka</th>
+          <th>Tarih</th>
+          <th>Durum</th>
+          <th>Aksiyon</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (s of statements.value()?.statements ?? []; track s.id) {
+          <tr>
+            <td>{{ s.fileName }}</td>
+            <td><span class="badge bank">{{ s.bankName }}</span></td>
+            <td>{{ s.uploadedAt | date:'dd.MM.yyyy HH:mm' }}</td>
+            <td>
+              @switch (s.status) {
+                @case ('processed') { <span class="badge success">✅ İşlendi</span> }
+                @case ('processing') { <span class="badge warning">⏳ İşleniyor</span> }
+                @case ('pending') { <span class="badge warning">⏳ Bekliyor</span> }
+                @case ('failed') { <span class="badge danger">❌ Hata</span> }
+              }
+            </td>
+            <td>
+              <a [routerLink]="['/statements', s.id]" class="view-btn">Detay</a>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" style="text-align: center; padding: 2rem;">Henüz ekstre yüklenmedi.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

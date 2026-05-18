@@ -1,0 +1,25 @@
+<nav class="navbar">
+  <div class="nav-container">
+    <a routerLink="/" class="nav-brand">
+      <span class="icon">💸</span> Kredi Harcamalarım
+    </a>
+    <div class="nav-links">
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-item">Dashboard</a>
+        <a routerLink="/upload" routerLinkActive="active-link" class="nav-item">Yükle</a>
+        <a routerLink="/statements" routerLinkActive="active-link" class="nav-item">Ekstreler</a>
+        <div class="divider"></div>
+        <div class="user-menu">
+          <span class="user-greeting">Merhaba, {{ auth.currentUser()?.name?.split(' ')?.[0] ?? 'Kullanıcı' }}</span>
+          <button class="btn-logout" (click)="auth.logout()">Çıkış</button>
+        </div>
+      } @else {
+        <a routerLink="/login" class="nav-item login-link">Giriş Yap</a>
+        <a routerLink="/register" class="btn-register">Kayıt Ol</a>
+      }
+    </div>
+  </div>
+</nav>
+<main class="container">
+  <router-outlet></router-outlet>
+</main>

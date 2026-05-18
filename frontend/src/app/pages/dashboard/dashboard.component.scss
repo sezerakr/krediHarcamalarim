@@ -1,0 +1,35 @@
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  select {
+    width: 150px;
+  }
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+.chart-container {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  h3 { margin-top: 0; margin-bottom: 1rem; color: var(--text-muted); }
+}

@@ -1,0 +1,68 @@
+@if (resource.isLoading()) {
+  <div class="loading">Yükleniyor…</div>
+} @else {
+  @if (data(); as d) {
+  <div class="detail-header">
+    <div>
+      <h1>{{ d.statement.fileName }}</h1>
+      <p class="meta">
+        <span class="badge bank">{{ d.statement.bankName }}</span> 
+        {{ d.statement.uploadedAt | date:'dd.MM.yyyy HH:mm' }}
+      </p>
+    </div>
+    <div class="search-box">
+      <input type="text" [(ngModel)]="searchTerm" placeholder="İşlem veya kategori ara..." />
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Tarih</th>
+          <th>İşlem Adı</th>
+          <th>Kategori</th>
+          <th>Tutar</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (tx of filtered(); track tx.id) {
+          <tr [class.expense]="tx.transactionType === 'EXPENSE'"
+              [class.income]="tx.transactionType === 'INCOME'">
+            <td>{{ tx.transactionDate | date:'dd.MM.yyyy' }}</td>
+            <td>
+              <div class="tx-name">
+                {{ tx.cleanName ?? tx.rawDescription }}
+                @if (tx.isMonthlySubscription === 1) { <span class="sub-icon" title="Aylık abonelik">🔄</span> }
+              </div>
+              @if (tx.cleanName) { <div class="tx-raw">{{ tx.rawDescription }}</div> }
+            </td>
+            <td><span class="category-badge">{{ tx.category ?? 'Diğer' }}</span></td>
+            <td class="amount">
+              {{ tx.transactionType === 'EXPENSE' ? '-' : '+' }}
+              {{ tx.amount | currency:tx.currency:'symbol':'1.2-2' }}
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="empty-state">Arama kriterinize uygun sonuç bulunamadı.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="totals-footer">
+    <div class="total-item expense">
+      <span class="label">Toplam Gider</span>
+      <span class="value">{{ totalExpense() | currency:'TRY':'symbol':'1.2-2' }}</span>
+    </div>
+    <div class="total-item income">
+      <span class="label">Toplam Gelir</span>
+      <span class="value">{{ totalIncome() | currency:'TRY':'symbol':'1.2-2' }}</span>
+    </div>
+    <div class="total-item net" [class.positive]="net() > 0" [class.negative]="net() < 0">
+      <span class="label">Net Durum</span>
+      <span class="value">{{ net() | currency:'TRY':'symbol':'1.2-2' }}</span>
+    </div>
+  </div>
+  }
+}

@@ -1,0 +1,29 @@
+<div class="dashboard-header">
+  <h1>Dashboard</h1>
+  <section class="filters">
+    <label>Banka:</label>
+    <select [value]="selectedBank()" (change)="onBankChange($event)">
+      <option value="ALL">Tümü</option>
+      <option value="ZİRAAT">Ziraat</option>
+      <option value="PARAF">Paraf</option>
+    </select>
+  </section>
+</div>
+
+<section class="cards">
+  <app-summary-card label="Toplam Harcama" [value]="totalExpense()" [isCurrency]="true" />
+  <app-summary-card label="Toplam Gelir" [value]="totalIncome()" [isCurrency]="true" />
+  <app-summary-card label="Aylık Abonelikler" [value]="subscriptionCount()" />
+  <app-summary-card label="Yüklenen Ekstre" [value]="statementCount()" />
+</section>
+
+<section class="charts">
+  <div class="chart-container">
+    <h3>Aylık Harcamalar</h3>
+    <app-monthly-chart [data]="byMonth()" />
+  </div>
+  <div class="chart-container">
+    <h3>Kategorilere Göre Harcamalar</h3>
+    <app-category-chart [data]="byCategory()" />
+  </div>
+</section>

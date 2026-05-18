@@ -1,0 +1,128 @@
+.navbar {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+
+  .nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-brand {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.5px;
+    
+    .icon {
+      font-size: 1.6rem;
+    }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+
+    .nav-item {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+      position: relative;
+      transition: color 0.2s;
+
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--primary);
+        transition: width 0.3s ease;
+      }
+
+      &:hover, &.active-link {
+        color: var(--primary);
+      }
+
+      &.active-link:after, &:hover:after {
+        width: 100%;
+      }
+    }
+
+    .divider {
+      width: 1px;
+      height: 24px;
+      background-color: var(--border);
+      margin: 0 0.5rem;
+      @media (max-width: 768px) { display: none; }
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .user-greeting {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-main);
+        @media (max-width: 768px) { display: none; }
+      }
+
+      .btn-logout {
+        background-color: #f1f3f5;
+        color: var(--text-main);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+
+        &:hover {
+          background-color: #ffebee;
+          color: var(--danger);
+        }
+      }
+    }
+
+    .login-link {
+      color: var(--text-main);
+      &:hover { color: var(--primary); }
+      &:after { display: none; }
+    }
+
+    .btn-register {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 10px rgba(63, 81, 181, 0.2);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(63, 81, 181, 0.3);
+      }
+    }
+  }
+}

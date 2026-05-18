@@ -2,3 +2,8 @@
 /README.md
 /READ_LLM.txt
 /static
+dev.db
+frontend/node_modules/
+frontend/.angular/
+__pycache__/
+*.sqlite3

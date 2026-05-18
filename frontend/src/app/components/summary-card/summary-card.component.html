@@ -1,0 +1,10 @@
+<div class="card">
+  <div class="label">{{ label() }}</div>
+  <div class="value">
+    @if (isCurrency()) {
+      {{ value() | currency:'TRY':'symbol':'1.2-2' }}
+    } @else {
+      {{ value() }}
+    }
+  </div>
+</div>

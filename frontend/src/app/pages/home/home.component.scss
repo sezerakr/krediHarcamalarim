@@ -1,0 +1,94 @@
+.hero-section {
+  text-align: center;
+  padding: 6rem 2rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border-radius: 12px;
+  margin-top: 2rem;
+  box-shadow: 0 10px 20px rgba(63, 81, 181, 0.2);
+
+  .hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      @media (max-width: 768px) { font-size: 2.2rem; }
+    }
+
+    p {
+      font-size: 1.25rem;
+      margin-bottom: 2.5rem;
+      opacity: 0.9;
+      @media (max-width: 768px) { font-size: 1rem; }
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background-color: var(--secondary);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 6px rgba(255, 64, 129, 0.3);
+
+      &:hover {
+        background-color: #f50057;
+        transform: translateY(-2px);
+        text-decoration: none;
+        box-shadow: 0 6px 12px rgba(255, 64, 129, 0.4);
+      }
+    }
+  }
+}
+
+.features-section {
+  padding: 5rem 0;
+  text-align: center;
+
+  h2 {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: var(--text-main);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+
+    .feature-card {
+      background: var(--surface);
+      padding: 2.5rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: transform 0.3s, box-shadow 0.3s;
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      }
+
+      .icon {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-dark);
+      }
+
+      p {
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+    }
+  }
+}

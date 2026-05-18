@@ -1,0 +1,64 @@
+<div class="upload-container">
+  <h1>Yeni Ekstre Yükle</h1>
+  
+  <div class="form-card">
+    <div class="form-group">
+      <label>Banka Seçimi</label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" name="bank" [(ngModel)]="selectedBank" [value]="BANKS.ZIRAAT" />
+          Ziraat Bankası (PDF)
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="bank" [(ngModel)]="selectedBank" [value]="BANKS.PARAF" />
+          Paraf (XLSX/CSV)
+        </label>
+      </div>
+    </div>
+
+    <div class="drop-zone" 
+         [class.dragging]="isDragging()"
+         (dragover)="onDragOver($event)"
+         (dragleave)="onDragLeave($event)"
+         (drop)="onDrop($event)">
+      <div class="icon">📄</div>
+      <p>Dosyayı buraya sürükleyin veya seçmek için tıklayın</p>
+      <input type="file" #fileInput (change)="onFileSelect($event)" 
+             [accept]="selectedBank() === BANKS.ZIRAAT ? '.pdf' : '.xlsx,.csv'"
+             style="display: none" />
+      <button type="button" class="browse-btn" (click)="fileInput.click()">Dosya Seç</button>
+    </div>
+
+    @if (selectedFile()) {
+      <div class="file-info">
+        <strong>Seçilen Dosya:</strong> {{ selectedFile()?.name }}
+        <button type="button" class="remove-btn" (click)="selectedFile.set(null)">✕</button>
+      </div>
+    }
+
+    @if (errorMsg(); as e) { <div class="error-msg">{{ e }}</div> }
+
+    @if (uploadProgress() > 0 && uploadProgress() < 100) {
+      <div class="progress-bar">
+        <div class="fill" [style.width.%]="uploadProgress()"></div>
+      </div>
+      <div class="progress-text">%{{ uploadProgress() }} Yükleniyor...</div>
+    }
+
+    <button class="submit-btn" [disabled]="!selectedFile() || uploading()" (click)="upload()">
+      {{ uploading() ? 'İşleniyor...' : 'Yükle ve İşle' }}
+    </button>
+  </div>
+
+  @if (summary(); as s) {
+    <div class="success-card">
+      <h3>✅ {{ s.message }}</h3>
+      <div class="stats">
+        <div class="stat"><span class="label">İşlem Sayısı:</span> <strong>{{ s.transactionCount }}</strong></div>
+        <div class="stat"><span class="label">Toplam Gider:</span> <strong>{{ s.summary.totalExpense }} ₺</strong></div>
+        <div class="stat"><span class="label">Toplam Gelir:</span> <strong>{{ s.summary.totalIncome }} ₺</strong></div>
+      </div>
+      <button class="view-btn" (click)="goToStatement(s.statementId)">Detayları Görüntüle</button>
+    </div>
+  }
+</div>

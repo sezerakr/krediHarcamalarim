@@ -1,0 +1,57 @@
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  @media (max-width: 768px) { flex-direction: column; gap: 1rem; }
+  
+  h1 { margin-bottom: 0.5rem; }
+  .meta { color: var(--text-muted); display: flex; align-items: center; gap: 10px; margin: 0; }
+}
+
+.search-box {
+  width: 300px;
+  @media (max-width: 768px) { width: 100%; }
+}
+
+.loading { padding: 3rem; text-align: center; color: var(--text-muted); }
+
+.badge.bank {
+  background: #e3f2fd; color: #1565c0; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: 500;
+}
+
+.tx-name { font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.tx-raw { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.sub-icon { font-size: 14px; }
+
+.category-badge { background: #f5f5f5; padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+
+tr.expense .amount { color: var(--danger); font-weight: 500; }
+tr.income .amount { color: var(--success); font-weight: 500; }
+
+.empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+
+.totals-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2rem;
+  margin-top: 2rem;
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  
+  .total-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    
+    .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .value { font-size: 20px; font-weight: 600; }
+    
+    &.expense .value { color: var(--danger); }
+    &.income .value { color: var(--success); }
+    &.net.positive .value { color: var(--success); }
+    &.net.negative .value { color: var(--danger); }
+  }
+}
