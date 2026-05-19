@@ -41,15 +41,15 @@ export class DashboardComponent {
 
   // ---- Data Resources ----
   private statementsResource = httpResource<{ statements: Statement[] }>(() =>
-    'http://localhost:3000/api/statements'
+    'https://btk.squadturkiye.com/api/statements'
   );
 
   private txResource = httpResource<{ transactions: Transaction[] }>(() =>
-    'http://localhost:3000/api/statements/transactions'
+    'https://btk.squadturkiye.com/api/statements/transactions'
   );
 
   protected predictionResource = httpResource<PredictionResponse>(() =>
-    'http://localhost:3000/api/predictions'
+    'https://btk.squadturkiye.com/api/predictions'
   );
 
   protected prediction = computed(() => this.predictionResource.value());

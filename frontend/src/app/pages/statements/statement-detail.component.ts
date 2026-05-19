@@ -18,7 +18,7 @@ export class StatementDetailComponent {
   protected searchTerm = signal('');
 
   protected resource = httpResource<{ statement: Statement; transactions: Transaction[] }>(() =>
-    `http://localhost:3000/api/statements/${this.id()}`
+    `https://btk.squadturkiye.com/api/statements/${this.id()}`
   );
 
   protected data = computed(() => this.resource.value());

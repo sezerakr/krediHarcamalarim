@@ -8,7 +8,7 @@ import { AuthResponse, User } from '../models/auth.model';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private readonly apiUrl = 'http://localhost:3000/api';
+  private readonly apiUrl = 'https://btk.squadturkiye.com/api';
 
   readonly currentUser = signal<User | null>(this.readUser());
   readonly isLoggedIn = computed(() => this.currentUser() !== null);

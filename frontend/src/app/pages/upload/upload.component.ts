@@ -81,7 +81,7 @@ export class UploadComponent {
       formData.append('bankName', this.selectedBank());
 
       try {
-        const req = this.http.post<UploadSummary>('http://localhost:3000/api/statements/upload', formData);
+        const req = this.http.post<UploadSummary>('https://btk.squadturkiye.com/api/statements/upload', formData);
         const res = await lastValueFrom(req);
         if (res) {
           uploadedSummaries.push(res);

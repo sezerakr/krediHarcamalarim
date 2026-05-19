@@ -19,13 +19,13 @@ export class StatementsListComponent {
   protected recategorizeMessage = signal<string | null>(null);
 
   protected statements = httpResource<{ statements: Statement[] }>(() =>
-    'http://localhost:3000/api/statements'
+    'https://btk.squadturkiye.com/api/statements'
   );
 
   recategorize() {
     this.isRecategorizing.set(true);
     this.recategorizeMessage.set(null);
-    this.http.post<{message: string, updated: number}>('http://localhost:3000/api/statements/recategorize', {})
+    this.http.post<{message: string, updated: number}>('https://btk.squadturkiye.com/api/statements/recategorize', {})
       .subscribe({
         next: (res) => {
           this.isRecategorizing.set(false);
@@ -42,7 +42,7 @@ export class StatementsListComponent {
 
   deleteStatement(id: number) {
     if (confirm('Bu ekstreyi ve tüm işlemlerini silmek istediğinize emin misiniz?')) {
-      this.http.delete(`http://localhost:3000/api/statements/${id}`)
+      this.http.delete(`https://btk.squadturkiye.com/api/statements/${id}`)
         .subscribe({
           next: () => {
             this.statements.reload();
