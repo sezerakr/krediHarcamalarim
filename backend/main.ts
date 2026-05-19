@@ -54,5 +54,5 @@ app.get("/", (c) => {
 // ---- Start server ----
 await initializeDatabase();
 
-Deno.serve({ port: 3000 }, app.fetch);
+Deno.serve({ port: 3005 }, app.fetch);
 console.log("🔥 Kredi Harcamalarım API running on http://localhost:3000");
