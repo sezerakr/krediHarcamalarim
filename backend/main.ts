@@ -25,7 +25,7 @@ app.route("/api/statements", statementsRoutes);
 app.route("/api/predictions", predictionsRoutes);
 
 // ---- Health check ----
-app.get("/", (c) => {
+app.get("/api", (c) => {
   return c.json({
     name: "Kredi Harcamalarım API",
     version: "1.0.0",
