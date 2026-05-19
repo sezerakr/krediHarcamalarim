@@ -13,7 +13,7 @@ import { db } from "../db/client.ts";
 import { statements, transactions } from "../db/schema.ts";
 import { authMiddleware } from "../middleware/auth.ts";
 import { parseZiraatPdf, parseParafRows, parseCsv } from "../services/parsers.ts";
-import { enrichWithGemini, describeParsingPipeline } from "../services/gemini.ts";
+import { enrichWithGemini, describeParsingPipeline, reCategorizeDigerItems } from "../services/gemini.ts";
 import type { RawParsedTransaction } from "../types.ts";
 
 const statementsRouter = new Hono();
@@ -53,6 +53,36 @@ statementsRouter.post("/upload", async (c) => {
     return c.json({ error: "Desteklenmeyen dosya formatı. PDF, XLSX veya CSV yükleyin" }, 400);
   }
 
+  // Compute file hash for duplicate detection
+  const buffer = new Uint8Array(await file.arrayBuffer());
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const fileHash = Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  // Check for duplicate upload
+  const [existing] = await db
+    .select({ id: statements.id, fileName: statements.fileName })
+    .from(statements)
+    .where(
+      and(
+        eq(statements.userId, userId),
+        eq(statements.fileHash, fileHash)
+      )
+    )
+    .limit(1);
+
+  if (existing) {
+    return c.json(
+      {
+        error: "Bu dosya daha önce yüklenmiş",
+        existingStatementId: existing.id,
+        existingFileName: existing.fileName,
+      },
+      409
+    );
+  }
+
   // Create statement record
   const [statement] = await db
     .insert(statements)
@@ -61,19 +91,28 @@ statementsRouter.post("/upload", async (c) => {
       fileName: file.name,
       bankName,
       fileType,
+      fileHash,
       status: "processing",
     })
     .returning();
 
   try {
-    const buffer = new Uint8Array(await file.arrayBuffer());
     let rawTransactions: RawParsedTransaction[] = [];
 
     // ---- Parse based on bank + file type ----
     if (bankName === "ZİRAAT" && fileType === "PDF") {
       // Dynamic import for unpdf (heavy dependency)
       const { extractText } = await import("unpdf");
-      const { text } = await extractText(buffer);
+      const result = await extractText(buffer);
+      // unpdf may return { text: string } or { text: string[] } depending on version
+      let text: string;
+      if (typeof result.text === "string") {
+        text = result.text;
+      } else if (Array.isArray(result.text)) {
+        text = result.text.join("\n");
+      } else {
+        text = String(result.text ?? "");
+      }
       rawTransactions = parseZiraatPdf(text);
     } else if (bankName === "PARAF" && fileType === "CSV") {
       const textDecoder = new TextDecoder("utf-8");
@@ -128,10 +167,41 @@ statementsRouter.post("/upload", async (c) => {
     await db.insert(transactions).values(txValues);
 
     // Update statement status
+    // Calculate statement period (YYYY-MM) from transactions
+    let statementPeriod = null;
+    if (enriched.length > 0) {
+      const counts = new Map<string, number>();
+      for (const t of enriched) {
+        if (!t.transactionDate) continue;
+        const parts = t.transactionDate.split("-");
+        if (parts.length === 3) {
+          const ym = `${parts[0]}-${parts[1]}`;
+          counts.set(ym, (counts.get(ym) || 0) + 1);
+        }
+      }
+      if (counts.size > 0) {
+        let maxCount = 0;
+        for (const [ym, count] of counts.entries()) {
+          if (count > maxCount) {
+            maxCount = count;
+            statementPeriod = ym;
+          }
+        }
+      }
+    }
+
     await db
       .update(statements)
-      .set({ status: "processed" })
+      .set({ 
+        status: "processed",
+        statementPeriod 
+      })
       .where(eq(statements.id, statement.id));
+
+    // Fire background re-categorization of any "Diğer" items (non-blocking)
+    backgroundReCategorize(userId).catch((err) =>
+      console.error("❌ Background re-categorize failed:", err)
+    );
 
     return c.json({
       message: "Ekstre başarıyla işlendi",
@@ -179,6 +249,30 @@ statementsRouter.get("/", async (c) => {
 });
 
 // ============================================================
+// GET /api/statements/transactions — get all user's transactions
+// NOTE: This MUST be before /:id to avoid "transactions" being parsed as an ID
+// ============================================================
+statementsRouter.get("/transactions", async (c) => {
+  const userId = c.get("userId");
+
+  const txs = await db
+    .select()
+    .from(transactions)
+    .where(eq(transactions.userId, userId));
+
+  return c.json({ transactions: txs });
+});
+
+// ============================================================
+// POST /api/statements/recategorize — re-categorize "Diğer" items
+// ============================================================
+statementsRouter.post("/recategorize", async (c) => {
+  const userId = c.get("userId");
+  const count = await backgroundReCategorize(userId);
+  return c.json({ message: `${count} işlem yeniden kategorize edildi`, updated: count });
+});
+
+// ============================================================
 // GET /api/statements/:id — get statement with transactions
 // ============================================================
 statementsRouter.get("/:id", async (c) => {
@@ -223,7 +317,8 @@ statementsRouter.post("/preview", async (c) => {
   try {
     if (bankName === "ZİRAAT" && fileName.endsWith(".pdf")) {
       const { extractText } = await import("unpdf");
-      const { text } = await extractText(buffer);
+      const result = await extractText(buffer);
+      const text = typeof result.text === "string" ? result.text : Array.isArray(result.text) ? result.text.join("\n") : String(result.text ?? "");
       rawTransactions = parseZiraatPdf(text);
     } else if (bankName === "PARAF" && fileName.endsWith(".csv")) {
       const csvText = new TextDecoder("utf-8").decode(buffer);
@@ -247,3 +342,37 @@ statementsRouter.post("/preview", async (c) => {
 });
 
 export default statementsRouter;
+
+// ============================================================
+// Background: re-categorize "Diğer" items for a user
+// Called after upload or via POST /api/statements/recategorize
+// ============================================================
+export async function backgroundReCategorize(userId: number) {
+  try {
+    const digerTxs = await db
+      .select({ id: transactions.id, rawDescription: transactions.rawDescription, category: transactions.category })
+      .from(transactions)
+      .where(and(eq(transactions.userId, userId), eq(transactions.category, "Diğer")));
+
+    if (digerTxs.length === 0) return 0;
+
+    const updates = await reCategorizeDigerItems(digerTxs);
+
+    for (const u of updates) {
+      await db
+        .update(transactions)
+        .set({
+          category: u.category,
+          cleanName: u.cleanName,
+          isMonthlySubscription: u.isMonthlySubscription ? 1 : 0,
+        })
+        .where(eq(transactions.id, u.id));
+    }
+
+    console.log(`✅ Re-categorized ${updates.length}/${digerTxs.length} 'Diğer' items`);
+    return updates.length;
+  } catch (err) {
+    console.error("❌ Background re-categorize error:", err);
+    return 0;
+  }
+}

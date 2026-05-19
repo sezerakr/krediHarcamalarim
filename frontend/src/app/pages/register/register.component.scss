@@ -1,30 +1,93 @@
-.auth-container {
+/* Auth Pages — Quiet Luxury Register */
+.auth-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 64px);
+  padding: 32px 16px;
 }
-.auth-form {
-  background: var(--surface);
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 400px;
-  
-  h1 { text-align: center; margin-bottom: 1.5rem; }
-  
-  .form-group {
-    margin-bottom: 1rem;
-    label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-  }
 
-  button { width: 100%; margin-top: 1rem; padding: 12px; }
-  
-  .link {
-    display: block;
-    text-align: center;
-    margin-top: 1rem;
-    font-size: 14px;
+.auth-widget {
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--surface-container-high);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  padding: 40px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.widget-header h1 {
+  font-size: 28px;
+  font-weight: 500;
+  margin-bottom: 32px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--on-surface);
   }
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  background: var(--primary);
+  color: var(--on-primary);
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) { background: var(--inverse-surface); }
+  &:disabled { background: var(--surface-container-high); color: var(--on-surface-variant); cursor: not-allowed; }
+
+  &.btn-sage {
+    background: var(--secondary);
+    &:hover:not(:disabled) { background: var(--on-secondary-container); }
+  }
+}
+
+.error-banner {
+  background: var(--error-container);
+  color: var(--on-error-container);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.divider-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+
+  .divider-line { flex: 1; height: 1px; background: var(--surface-container-high); }
+  span { font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: var(--on-surface-variant); text-transform: uppercase; }
+}
+
+.link-switch {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  color: var(--secondary);
+  font-weight: 500;
+  &:hover { text-decoration: underline; }
 }

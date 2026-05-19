@@ -2,14 +2,16 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { HttpClient, HttpEventType } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CurrencyPipe } from '@angular/common';
 import { BankName, BANKS } from '../../models/bank.model';
 import { UploadSummary } from '../../models/statement.model';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-upload',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, CurrencyPipe],
   templateUrl: './upload.component.html',
   styleUrl: './upload.component.scss'
 })
@@ -20,12 +22,12 @@ export class UploadComponent {
   BANKS = BANKS;
   
   selectedBank = signal<BankName>(BANKS.ZIRAAT);
-  selectedFile = signal<File | null>(null);
+  selectedFiles = signal<File[]>([]);
   isDragging = signal(false);
   uploading = signal(false);
   uploadProgress = signal(0);
   errorMsg = signal<string | null>(null);
-  summary = signal<UploadSummary | null>(null);
+  summaries = signal<UploadSummary[]>([]);
 
   onDragOver(e: DragEvent) { e.preventDefault(); this.isDragging.set(true); }
   onDragLeave(e: DragEvent) { e.preventDefault(); this.isDragging.set(false); }
@@ -34,55 +36,67 @@ export class UploadComponent {
     e.preventDefault();
     this.isDragging.set(false);
     if (e.dataTransfer?.files.length) {
-      this.handleFile(e.dataTransfer.files[0]);
+      this.handleFiles(e.dataTransfer.files);
     }
   }
 
   onFileSelect(e: Event) {
     const input = e.target as HTMLInputElement;
     if (input.files?.length) {
-      this.handleFile(input.files[0]);
+      this.handleFiles(input.files);
     }
   }
 
-  private handleFile(file: File) {
+  private handleFiles(files: FileList | File[]) {
     this.errorMsg.set(null);
-    this.summary.set(null);
-    this.selectedFile.set(file);
+    this.summaries.set([]);
+    
+    const current = this.selectedFiles();
+    const newFiles = Array.from(files).filter(f => !current.find(c => c.name === f.name));
+    this.selectedFiles.set([...current, ...newFiles]);
   }
 
-  upload() {
-    const file = this.selectedFile();
-    if (!file) return;
+  removeFile(index: number) {
+    const arr = [...this.selectedFiles()];
+    arr.splice(index, 1);
+    this.selectedFiles.set(arr);
+  }
+
+  async upload() {
+    const files = this.selectedFiles();
+    if (!files.length) return;
 
     this.uploading.set(true);
     this.errorMsg.set(null);
-    this.summary.set(null);
+    this.summaries.set([]);
     this.uploadProgress.set(0);
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('bankName', this.selectedBank());
+    const uploadedSummaries: UploadSummary[] = [];
 
-    this.http.post<UploadSummary>('http://localhost:3000/api/statements/upload', formData, {
-      reportProgress: true,
-      observe: 'events'
-    }).subscribe({
-      next: (event) => {
-        if (event.type === HttpEventType.UploadProgress && event.total) {
-          this.uploadProgress.set(Math.round(100 * event.loaded / event.total));
-        } else if (event.type === HttpEventType.Response) {
-          this.summary.set(event.body);
-          this.uploading.set(false);
-          this.selectedFile.set(null);
+    // Upload sequentially to avoid overloading the AI/Backend
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('bankName', this.selectedBank());
+
+      try {
+        const req = this.http.post<UploadSummary>('http://localhost:3000/api/statements/upload', formData);
+        const res = await lastValueFrom(req);
+        if (res) {
+          uploadedSummaries.push(res);
         }
-      },
-      error: (err) => {
-        this.errorMsg.set(err?.error?.error ?? 'Dosya yüklenirken bir hata oluştu.');
+        this.uploadProgress.set(Math.round(((i + 1) / files.length) * 100));
+      } catch (err: any) {
+        this.errorMsg.set(`${file.name} yüklenirken hata: ` + (err?.error?.error ?? 'Bilinmeyen hata'));
         this.uploading.set(false);
-        this.uploadProgress.set(0);
+        return; // Stop on first error
       }
-    });
+    }
+
+    this.summaries.set(uploadedSummaries);
+    this.uploading.set(false);
+    this.selectedFiles.set([]);
   }
 
   goToStatement(id: number) {

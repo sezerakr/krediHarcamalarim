@@ -22,9 +22,9 @@ function convertDate(turkishDate: string): string {
 // ============================================================
 // Utility: Turkish amount string -> number
 // "1.320,00" -> 1320.00
-// "1.320,00+" -> 1320.00 (income flag)
-// "+6,99TL " -> 6.99 (income flag)
-// "69,90TL " -> 69.90
+// "55,24+" -> 55.24 (income)
+// "+500,00TL" -> 500.00 (income)
+// "871,44TL" -> 871.44
 // ============================================================
 interface ParsedAmount {
   value: number;
@@ -36,7 +36,7 @@ function parseAmount(raw: string): ParsedAmount {
 
   let cleaned = raw.trim();
 
-  // Check for income indicators
+  // Check for income indicators: + at start or end
   const isIncome = cleaned.endsWith("+") || cleaned.startsWith("+");
 
   // Remove TL suffix, +/- signs, whitespace
@@ -61,98 +61,134 @@ function isDateString(str: string): boolean {
 }
 
 // ============================================================
-// ZIRAAT BANKASI — PDF Text Parser
+// ZIRAAT BANKASI — PDF Text Parser (multi-page, space-separated)
+//
+// Actual PDF format (from extractText, array of pages):
+//   DD.MM.YYYY DESCRIPTION CITY AMOUNT_TL AMOUNT_USD [BANKKART_LIRA]
+//   Income marked with + suffix: "55,24+"
+//   Card sections start with: "KART NO : 4345-####-####-2996 / NAME"
 // ============================================================
 
-/** Rows to ignore (noise) */
-const ZIRAAT_NOISE_PATTERNS = [
-  /KKDF/i,
-  /BSMV/i,
-  /Kredi faizi/i,
-  /Gecikme faizi/i,
+/** Rows/lines to skip entirely */
+const ZIRAAT_SKIP_PATTERNS = [
   /ÖNCEKİ AYDAN DEVİR/i,
   /SÖZLEŞME DEĞİŞİKLİĞİ/i,
   /DÖNEM BORCU/i,
   /ASGARİ ÖDEME/i,
   /SON ÖDEME TARİHİ/i,
   /HESAP ÖZETİ/i,
-  /İşlem Tarihi/i,
   /TOPLAM BORÇ/i,
+  /Devreden Bakiye/i,
+  /Harcamalarınız/i,
+  /Ücretler ve/i,
+  /Kesintiler/i,
+  /Ödemeleriniz/i,
+  /Büyük Mükellefler/i,
+  /Ekstre ile ilgili/i,
+  /Alışveriş faizi/i,
+  /Nakit avans ücreti/i,
+  /Nakit avans faizi/i,
+  /Faiz ve Ücretler/i,
+  /^Sayın\s/i,
+  /^Müşteri Numarası/i,
+  /^Hesap Kesim/i,
+  /^Son Ödeme/i,
+  /^Dönem Borcu/i,
+  /^Asgari Ödeme/i,
+  /^İşlem Tarihi\s+İşlem/i,
+  /^Kart Limiti/i,
+  /^Kullanılabilir/i,
+  /^Nakit Avans Limiti/i,
+  /^Sonraki/i,
+  /^Bugüne Kadar/i,
+  /^\d{4}-####-####-\d{4}\s/,
+  /^KART NO\s*:/i,
 ];
 
 export function parseZiraatPdf(rawText: string): RawParsedTransaction[] {
   const transactions: RawParsedTransaction[] = [];
-  const lines = rawText.split("\n").map((l) => l.trim()).filter(Boolean);
 
-  // Find the start anchor: the header line
-  let startIdx = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if (
-      lines[i].includes("İşlem Tarihi") &&
-      lines[i].includes("İşlem Açıklaması")
-    ) {
-      startIdx = i + 1;
-      break;
-    }
-  }
+  // Handle array input (pages) or single string
+  const text = Array.isArray(rawText)
+    ? rawText.join("\n")
+    : String(rawText ?? "");
 
-  if (startIdx === -1) {
-    // Fallback: try to find any line starting with a date
-    startIdx = 0;
-  }
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
 
-  for (let i = startIdx; i < lines.length; i++) {
-    const line = lines[i];
+  for (const line of lines) {
+    // Skip noise lines
+    if (ZIRAAT_SKIP_PATTERNS.some((p) => p.test(line))) continue;
 
-    // Stop at summary/footer sections
-    if (ZIRAAT_NOISE_PATTERNS.some((p) => p.test(line))) continue;
+    // Main pattern: DD.MM.YYYY <description> <amount_tl> <amount_usd> [bankkart_lira]
+    // The amounts are at the end. We need to extract date, description, and amounts.
+    const dateMatch = line.match(/^(\d{2}\.\d{2}\.\d{4})\s+(.+)$/);
+    if (!dateMatch) continue;
 
-    // Try to parse as CSV-like: "date", "description", "amount", ...
-    // Or as space/tab separated
-    const csvMatch = line.match(
-      /^"?(\d{2}\.\d{2}\.\d{4})"?\s*[,;]\s*"?([^",;]+)"?\s*[,;]\s*"?([^",;]*)"?/
+    const dateStr = dateMatch[1];
+    const rest = dateMatch[2];
+
+    // Turkish amounts always have comma as decimal separator: "1.320,00", "55,24+", "0,00"
+    // USD prices in descriptions use dot: "USD 6.00", "USD 1.25"
+    // Patterns:
+    //   Normal:  "description 2.313,00 0,00"        → TL=2313, USD=0
+    //   Income:  "description 55,24+"                → TL=55.24, income
+    //   Fee:     "BSMV (Faiz) 111,54 0,00"           → TL=111.54
+    //   USD desc: "ANTHROPIC USD 6.00 270,74 0,00"   → TL=270.74 (USD price is part of desc)
+
+    // Turkish amount pattern: digits with optional thousand dots, comma, decimal digits, optional +
+    const TRK_AMT = /(\d{1,3}(?:\.\d{3})*,\d{2}\+?)$/;
+
+    // Try matching two Turkish amounts at end: "TL_AMOUNT 0,00"
+    const twoAmounts = rest.match(
+      /(\d{1,3}(?:\.\d{3})*,\d{2}\+?)\s+(\d{1,3}(?:\.\d{3})*,\d{2}\+?)\s*$/
     );
 
-    if (csvMatch) {
-      const [, dateStr, description, amountStr] = csvMatch;
-      const { value, isIncome } = parseAmount(amountStr);
+    if (twoAmounts) {
+      const description = rest
+        .substring(0, rest.length - twoAmounts[0].length)
+        .trim();
+      const tlAmount = parseAmount(twoAmounts[1]);
+      const usdAmount = parseAmount(twoAmounts[2]);
 
-      if (value > 0) {
-        transactions.push({
-          bankName: "ZİRAAT",
-          transactionDate: convertDate(dateStr),
-          rawDescription: description.trim(),
-          amount: value,
-          currency: "TRY",
-          transactionType: isIncome ? "INCOME" : "EXPENSE",
-        });
-      }
-      continue;
-    }
+      let amount = tlAmount.value;
+      let currency: "TRY" | "USD" = "TRY";
+      let isIncome = tlAmount.isIncome || usdAmount.isIncome;
 
-    // Alternative: space/tab separated (common in PDF text extraction)
-    const parts = line.split(/\t+|\s{2,}/);
-    if (parts.length >= 3 && isDateString(parts[0])) {
-      const dateStr = parts[0];
-      const description = parts[1];
-      const amountStr = parts[2];
-      const { value, isIncome } = parseAmount(amountStr);
-
-      // Check for USD amount in parts[3]
-      let currency = "TRY";
-      if (parts[3] && parts[3].trim() !== "" && parts[3].trim() !== "0,00") {
+      // If TL is 0 but USD is not, it's a USD transaction
+      if (tlAmount.value === 0 && usdAmount.value > 0) {
+        amount = usdAmount.value;
         currency = "USD";
       }
 
-      if (value > 0) {
+      if (amount > 0 && description.length > 0) {
         transactions.push({
           bankName: "ZİRAAT",
           transactionDate: convertDate(dateStr),
           rawDescription: description.trim(),
-          amount: value,
+          amount,
           currency,
           transactionType: isIncome ? "INCOME" : "EXPENSE",
         });
+      }
+    } else {
+      // Try single Turkish amount at end (income lines without USD column)
+      const singleAmount = rest.match(TRK_AMT);
+      if (singleAmount) {
+        const description = rest
+          .substring(0, rest.length - singleAmount[0].length)
+          .trim();
+        const { value, isIncome } = parseAmount(singleAmount[1]);
+
+        if (value > 0 && description.length > 0) {
+          transactions.push({
+            bankName: "ZİRAAT",
+            transactionDate: convertDate(dateStr),
+            rawDescription: description.trim(),
+            amount: value,
+            currency: "TRY",
+            transactionType: isIncome ? "INCOME" : "EXPENSE",
+          });
+        }
       }
     }
   }
@@ -162,12 +198,19 @@ export function parseZiraatPdf(rawText: string): RawParsedTransaction[] {
 
 // ============================================================
 // PARAF / HALKBANK — XLSX/CSV Parser
+//
+// Actual XLSX format (from SheetJS):
+// Row structure after "Ekstre İşlemleri" + "Önceki Dönem Bakiyeniz" + header:
+//   0: İşlem Tarihi (DD.MM.YYYY)
+//   1: Referans (number or string)
+//   2: Açıklama
+//   3: Sektör (often empty string "")
+//   4: Orjinal Tutar (number for USD, or empty)
+//   5: Tutar ("871,44TL " or "+500,00TL ")
+//   6: Kalan Borç / Taksit (e.g., "2/12" or empty)
+//   7: ParafPara(TL)
 // ============================================================
 
-/**
- * Parse Paraf data from a 2D array (rows of cells).
- * Works with both XLSX (converted via SheetJS) and CSV.
- */
 export function parseParafRows(
   rows: (string | number | null | undefined)[][]
 ): RawParsedTransaction[] {
@@ -196,14 +239,21 @@ export function parseParafRows(
 
   if (startIdx === -1) return transactions;
 
-  // Skip "Önceki Dönem Bakiyeniz" row and header row
   for (let i = startIdx; i < rows.length; i++) {
     const rowStr = (rows[i]?.join(" ") || "").toLowerCase();
+
+    // Skip meta rows
     if (
       rowStr.includes("önceki dönem") ||
       rowStr.includes("işlem tarihi") ||
       rowStr.includes("referans")
     ) {
+      continue;
+    }
+
+    // Skip card number header rows (e.g., "5430 81** **** 6535")
+    const firstCellStr = String(rows[i]?.[0] || "").trim();
+    if (/^\d{4}\s+\d{2}\*{2}\s+\*{4}\s+\d{4}$/.test(firstCellStr)) {
       continue;
     }
 
@@ -213,12 +263,12 @@ export function parseParafRows(
     const dateStr = String(cells[0] || "").trim();
     if (!isDateString(dateStr)) continue;
 
-    // Column mapping:
-    // 0: İşlem Tarihi, 1: Referans, 2: Açıklama, 3: Sektör,
-    // 4: Orjinal Tutar, 5: Tutar, 6: Taksit, 7: ParafPara
+    // Column mapping
     const description = String(cells[2] || "").trim();
     const sector = String(cells[3] || "").trim();
     const amountStr = String(cells[5] || "").trim();
+
+    if (!description || !amountStr) continue;
 
     const { value, isIncome } = parseAmount(amountStr);
 

@@ -1,10 +1,18 @@
-<div class="card">
-  <div class="label">{{ label() }}</div>
-  <div class="value">
-    @if (isCurrency()) {
-      {{ value() | currency:'TRY':'symbol':'1.2-2' }}
-    } @else {
-      {{ value() }}
-    }
+<div class="metric-card">
+  <div class="metric-top">
+    <span class="metric-label">{{ label() }}</span>
+    <div class="metric-icon-badge">
+      <span class="material-symbols-outlined">{{ icon() }}</span>
+    </div>
+  </div>
+  <div class="metric-bottom">
+    <div class="metric-value">
+      @if (isCurrency()) {
+        <span class="currency-symbol">₺</span>
+        <span class="monospaced-number">{{ value() | currency:'TRY':'':'1.0-0' }}</span>
+      } @else {
+        <span class="monospaced-number">{{ value() }}</span>
+      }
+    </div>
   </div>
 </div>

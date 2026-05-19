@@ -26,6 +26,7 @@ export async function initializeDatabase(): Promise<void> {
       file_name TEXT NOT NULL,
       bank_name TEXT NOT NULL,
       file_type TEXT NOT NULL,
+      file_hash TEXT,
       statement_period TEXT,
       uploaded_at TEXT NOT NULL DEFAULT (datetime('now')),
       status TEXT NOT NULL DEFAULT 'pending',
@@ -55,6 +56,31 @@ export async function initializeDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_transactions_bank_name ON transactions(bank_name);
     CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(transaction_date);
     CREATE INDEX IF NOT EXISTS idx_statements_user_id ON statements(user_id);
+  `);
+
+  // Migration: add file_hash column if it doesn't exist (for existing DBs)
+  try {
+    await client.execute("ALTER TABLE statements ADD COLUMN file_hash TEXT");
+  } catch {
+    // Column already exists — ignore
+  }
+
+  // Create index on file_hash (safe to run after migration)
+  try {
+    await client.execute("CREATE INDEX IF NOT EXISTS idx_statements_file_hash ON statements(file_hash)");
+  } catch {
+    // ignore
+  }
+
+  // Predictions cache table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS predictions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      prediction_data TEXT NOT NULL,
+      transaction_count INTEGER NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
   `);
 
   console.log("✅ Database initialized successfully");

@@ -1,29 +1,368 @@
-<div class="dashboard-header">
-  <h1>Dashboard</h1>
-  <section class="filters">
-    <label>Banka:</label>
-    <select [value]="selectedBank()" (change)="onBankChange($event)">
-      <option value="ALL">Tümü</option>
-      <option value="ZİRAAT">Ziraat</option>
-      <option value="PARAF">Paraf</option>
-    </select>
-  </section>
+<!-- Page Header -->
+<div class="container-fluid px-0">
+  <div class="row align-items-end mb-4">
+    <div class="col">
+      <h2 class="fw-semibold mb-1">Finansal Özet</h2>
+      <p class="text-muted small mb-0">Hoş geldiniz, harcama geçmişiniz ve tahminleriniz aşağıdadır.</p>
+    </div>
+    <div class="col-auto">
+      <a routerLink="/upload" class="btn-action primary">
+        <span class="material-symbols-outlined">add</span>
+        Yeni İşlem
+      </a>
+    </div>
+  </div>
 </div>
 
-<section class="cards">
-  <app-summary-card label="Toplam Harcama" [value]="totalExpense()" [isCurrency]="true" />
-  <app-summary-card label="Toplam Gelir" [value]="totalIncome()" [isCurrency]="true" />
-  <app-summary-card label="Aylık Abonelikler" [value]="subscriptionCount()" />
-  <app-summary-card label="Yüklenen Ekstre" [value]="statementCount()" />
-</section>
+<!-- Global Filters -->
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+  <div class="bank-pills">
+    <button class="pill" [class.active]="selectedBank() === 'ALL'" (click)="selectedBank.set('ALL')">Tümü</button>
+    <button class="pill" [class.active]="selectedBank() === 'ZİRAAT'" (click)="selectedBank.set('ZİRAAT')">
+      <span class="material-symbols-outlined">account_balance</span> Ziraat
+    </button>
+    <button class="pill" [class.active]="selectedBank() === 'PARAF'" (click)="selectedBank.set('PARAF')">
+      <span class="material-symbols-outlined">credit_card</span> Paraf
+    </button>
+  </div>
 
-<section class="charts">
-  <div class="chart-container">
-    <h3>Aylık Harcamalar</h3>
-    <app-monthly-chart [data]="byMonth()" />
+  <div class="period-filter d-flex align-items-center gap-2">
+    <span class="material-symbols-outlined text-muted" style="font-size: 20px;">calendar_month</span>
+    <select class="form-select" style="width: auto; min-width: 150px; cursor: pointer;" 
+            [ngModel]="selectedPeriod()" 
+            (ngModelChange)="selectedPeriod.set($event)">
+      <option value="ALL">Tüm Zamanlar</option>
+      @for (p of availablePeriods(); track p) {
+        <option [value]="p">{{ p }}</option>
+      }
+    </select>
   </div>
-  <div class="chart-container">
-    <h3>Kategorilere Göre Harcamalar</h3>
-    <app-category-chart [data]="byCategory()" />
+</div>
+
+<!-- Metric Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <app-summary-card label="Toplam Harcama" icon="shopping_cart" [value]="totalExpense()" [isCurrency]="true" />
   </div>
-</section>
+  <div class="col-6 col-lg-3">
+    <app-summary-card label="Toplam Gelir" icon="payments" [value]="totalIncome()" [isCurrency]="true" />
+  </div>
+  <div class="col-6 col-lg-3">
+    <app-summary-card label="Aylık Abonelikler" icon="autorenew" [value]="subscriptionCount()" />
+  </div>
+  <div class="col-6 col-lg-3">
+    <app-summary-card label="Yüklenen Ekstre" icon="description" [value]="statementCount()" />
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+  <div class="col-12 col-lg-6">
+    <div class="chart-panel">
+      <div class="chart-header">
+        <h3>Aylık Harcamalar</h3>
+        <small class="text-muted">Aya tıklayarak detay görüntüleyin</small>
+      </div>
+      <app-monthly-chart [data]="byMonth()" (monthClick)="onMonthClick($event)" />
+    </div>
+  </div>
+  <div class="col-12 col-lg-6">
+    <div class="chart-panel">
+      <div class="chart-header">
+        <h3>Kategorilere Göre</h3>
+        <small class="text-muted">Kategoriye tıklayarak detay görüntüleyin</small>
+      </div>
+      <app-category-chart [data]="byCategory()" (categoryClick)="onCategoryClick($event)" />
+    </div>
+  </div>
+</div>
+
+<!-- AI Prediction Section -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="prediction-card">
+      <div class="prediction-header">
+        <div>
+          <h3>
+            <span class="material-symbols-outlined ai-icon">auto_awesome</span>
+            Gelecek Ay Harcama Tahmini
+          </h3>
+          <p>Yapay zeka modelimiz harcama verilerinizi analiz ederek tahmin oluşturur</p>
+        </div>
+      </div>
+
+      @if (predictionLoading()) {
+        <div class="prediction-loading">
+          <span class="material-symbols-outlined spin">progress_activity</span>
+          <span>Tahmin oluşturuluyor...</span>
+        </div>
+      } @else {
+        @if (prediction(); as pred) {
+          <div class="prediction-body">
+            <div class="prediction-main">
+              <div class="prediction-amount">
+                <span class="currency">₺</span>
+                <span class="amount monospaced-number">{{ pred.totalPredicted | currency:'TRY':'':'1.0-0' }}</span>
+              </div>
+              <div class="prediction-trend" [class.up]="pred.trend === 'up'" [class.down]="pred.trend === 'down'">
+                <span class="material-symbols-outlined">
+                  {{ pred.trend === 'up' ? 'trending_up' : pred.trend === 'down' ? 'trending_down' : 'trending_flat' }}
+                </span>
+                <span>Geçen aya göre %{{ pred.percentageChange | number:'1.0-1' }}
+                  {{ pred.trend === 'up' ? 'artış' : pred.trend === 'down' ? 'azalış' : 'sabit' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="row g-2">
+              @for (cat of pred.categories; track cat.category) {
+                <div class="col-12">
+                  <div class="pred-cat-row">
+                    <span class="pred-cat-name">{{ cat.category }}</span>
+                    <div class="pred-cat-bar-track">
+                      <div class="pred-cat-bar-fill"
+                           [style.width.%]="(cat.predictedAmount / pred.totalPredicted * 100)"></div>
+                    </div>
+                    <span class="pred-cat-amount monospaced-number">₺{{ cat.predictedAmount | number:'1.0-0' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (pred.advice) {
+              <div class="prediction-advice">
+                <span class="material-symbols-outlined">lightbulb</span>
+                <p>{{ pred.advice }}</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="prediction-empty">
+            <span class="material-symbols-outlined">analytics</span>
+            <p>Henüz yeterli veri yok. Daha fazla ekstre yükleyerek yapay zeka tahminlerini aktifleştirin.</p>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Transaction Table -->
+<div class="row">
+  <div class="col-12">
+    <div class="tx-table-panel">
+      <div class="tx-table-header">
+        <h3>İşlem Geçmişi</h3>
+        <div class="tx-table-meta">
+          <span class="tx-count">{{ tableTransactions().length }} işlem</span>
+        </div>
+      </div>
+
+      <div class="tx-table-filters p-3 border-bottom" style="background-color: var(--surface-container-low); border-color: var(--outline-variant) !important;">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-lg-3">
+            <div class="input-group flex-nowrap">
+              <span class="input-group-text bg-surface border-outline-variant"><span class="material-symbols-outlined" style="font-size: 18px;">search</span></span>
+              <input type="text" class="form-control bg-surface border-outline-variant" placeholder="İşlem ara..." [(ngModel)]="filterSearch" (ngModelChange)="onFilterChange()">
+            </div>
+          </div>
+          <div class="col-6 col-lg-2">
+            <select class="form-select bg-surface border-outline-variant" [ngModel]="selectedBank()" (ngModelChange)="selectedBank.set($event); onFilterChange()">
+              <option value="ALL">Tüm Bankalar</option>
+              <option value="ZİRAAT">Ziraat</option>
+              <option value="PARAF">Paraf</option>
+            </select>
+          </div>
+          <div class="col-6 col-lg-2">
+            <select class="form-select bg-surface border-outline-variant" [(ngModel)]="filterMonth" (ngModelChange)="onFilterChange()">
+              <option value="">Tüm Aylar</option>
+              @for (m of MONTHS; track $index) {
+                <option [value]="$index">{{ m }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-6 col-lg-2">
+            <select class="form-select bg-surface border-outline-variant" [(ngModel)]="filterCategory" (ngModelChange)="onFilterChange()">
+              <option value="">Tüm Kategoriler</option>
+              @for (c of availableCategories(); track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-6 col-lg-2">
+            <select class="form-select bg-surface border-outline-variant" [(ngModel)]="filterType" (ngModelChange)="onFilterChange()">
+              <option value="">Tüm Türler</option>
+              <option value="EXPENSE">Gider</option>
+              <option value="INCOME">Gelir</option>
+            </select>
+          </div>
+          <div class="col-12 col-lg-1 d-flex justify-content-end">
+            @if (hasActiveFilters() || selectedBank() !== 'ALL') {
+              <button class="btn w-100 d-inline-flex align-items-center justify-content-center" 
+                      (click)="clearAllFilters()" 
+                      style="background-color: var(--error-container); color: var(--on-error-container); border: none; border-radius: 8px; transition: opacity 0.2s; height: 100%; min-height: 40px;" 
+                      title="Filtreleri Temizle"
+                      onmouseover="this.style.opacity='0.8'"
+                      onmouseout="this.style.opacity='1'">
+                <span class="material-symbols-outlined" style="font-size: 20px;">filter_alt_off</span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 tx-fixed-table">
+          <thead>
+            <tr>
+              <th class="col-date">Tarih</th>
+              <th class="col-bank">Banka</th>
+              <th class="col-desc">Açıklama</th>
+              <th class="col-cat">Kategori</th>
+              <th class="col-amount">Tutar</th>
+              <th class="col-type">Tür</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (tx of paginatedTx(); track tx.id) {
+              <tr>
+                <td class="monospaced-number">{{ tx.transactionDate }}</td>
+                <td>
+                  <span class="badge" [class.bg-dark]="tx.bankName === 'ZİRAAT'" [class.bg-sage]="tx.bankName === 'PARAF'">
+                    {{ tx.bankName }}
+                  </span>
+                </td>
+                <td class="tx-desc" [title]="tx.cleanName || tx.rawDescription">{{ tx.cleanName || tx.rawDescription }}</td>
+                <td>
+                  <span class="category-pill" (click)="onTableCategoryClick(tx.category ?? 'Diğer')"
+                        [class.active]="filterCategory() === (tx.category ?? 'Diğer')"
+                        [title]="tx.category ?? 'Diğer'">
+                    {{ tx.category ?? 'Diğer' }}
+                  </span>
+                </td>
+                <td class="monospaced-number tx-amount" [class.income]="tx.transactionType === 'INCOME'" [class.expense]="tx.transactionType === 'EXPENSE'">
+                  {{ tx.transactionType === 'INCOME' ? '+' : '-' }}₺{{ tx.amount | number:'1.2-2' }}
+                </td>
+                <td class="text-center">
+                  @if (tx.isMonthlySubscription === 1) {
+                    <span class="material-symbols-outlined sub-icon" title="Aylık Abonelik">autorenew</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="text-center py-5 text-muted">
+                  <span class="material-symbols-outlined d-block mb-2" style="font-size:36px">search_off</span>
+                  Henüz işlem bulunamadı.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <nav class="tx-pagination">
+          <ul class="pagination pagination-sm justify-content-center mb-0 modern-pagination">
+            <li class="page-item" [class.disabled]="currentPage() === 1">
+              <button class="page-link" (click)="goToPage(currentPage() - 1)">
+                 <span class="material-symbols-outlined" style="font-size: 16px;">chevron_left</span>
+              </button>
+            </li>
+            @for (p of pageNumbers(); track p) {
+              <li class="page-item" [class.active]="p === currentPage()">
+                <button class="page-link" (click)="goToPage(p)">{{ p }}</button>
+              </li>
+            }
+            <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+              <button class="page-link" (click)="goToPage(currentPage() + 1)">
+                 <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL: Chart Detail Drill-down                                -->
+<!-- ============================================================ -->
+@if (modalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()"></div>
+  <div class="detail-modal">
+    <div class="detail-modal-dialog">
+      <div class="detail-modal-header">
+        <h4>{{ modalTitle() }}</h4>
+        <div class="detail-modal-summary">
+          <span class="modal-count">{{ modalTransactions().length }} işlem</span>
+          <span class="modal-total monospaced-number">Toplam: ₺{{ modalTotal() | number:'1.2-2' }}</span>
+        </div>
+        <button class="modal-close-btn" (click)="closeModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="detail-modal-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 tx-fixed-table">
+            <thead>
+              <tr>
+                <th class="col-date">Tarih</th>
+                <th class="col-bank">Banka</th>
+                <th class="col-desc">Açıklama</th>
+                <th class="col-cat">Kategori</th>
+                <th class="col-amount">Tutar</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (tx of modalPaginatedTx(); track tx.id) {
+                <tr>
+                  <td class="monospaced-number">{{ tx.transactionDate }}</td>
+                  <td>
+                    <span class="badge" [class.bg-dark]="tx.bankName === 'ZİRAAT'" [class.bg-sage]="tx.bankName === 'PARAF'">
+                      {{ tx.bankName }}
+                    </span>
+                  </td>
+                  <td class="tx-desc" [title]="tx.cleanName || tx.rawDescription">{{ tx.cleanName || tx.rawDescription }}</td>
+                  <td>
+                    <span class="category-pill">{{ tx.category ?? 'Diğer' }}</span>
+                  </td>
+                  <td class="monospaced-number tx-amount" [class.income]="tx.transactionType === 'INCOME'" [class.expense]="tx.transactionType === 'EXPENSE'">
+                    {{ tx.transactionType === 'INCOME' ? '+' : '-' }}₺{{ tx.amount | number:'1.2-2' }}
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-muted">İşlem bulunamadı.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      @if (modalTotalPages() > 1) {
+        <div class="detail-modal-footer">
+          <ul class="pagination pagination-sm justify-content-center mb-0 modern-pagination">
+            <li class="page-item" [class.disabled]="modalPage() === 1">
+              <button class="page-link" (click)="goToModalPage(modalPage() - 1)">
+                 <span class="material-symbols-outlined" style="font-size: 16px;">chevron_left</span>
+              </button>
+            </li>
+            @for (p of modalPageNumbers(); track p) {
+              <li class="page-item" [class.active]="p === modalPage()">
+                <button class="page-link" (click)="goToModalPage(p)">{{ p }}</button>
+              </li>
+            }
+            <li class="page-item" [class.disabled]="modalPage() === modalTotalPages()">
+              <button class="page-link" (click)="goToModalPage(modalPage() + 1)">
+                 <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      }
+    </div>
+  </div>
+}

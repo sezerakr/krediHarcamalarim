@@ -1,17 +1,70 @@
-.card {
-  background: var(--surface);
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  border-left: 4px solid var(--primary);
+/* Summary Card — Quiet Luxury Metric */
+.metric-card {
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: var(--outline);
+  }
 }
-.label {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
+
+.metric-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
-.value {
-  font-size: 24px;
+
+.metric-label {
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-main);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+.metric-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--secondary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+
+  .material-symbols-outlined {
+    font-size: 16px;
+    color: var(--on-secondary-container);
+  }
+
+  .metric-card:hover & {
+    transform: scale(1.1);
+  }
+}
+
+.metric-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+
+  .currency-symbol {
+    font-size: 20px;
+    color: var(--on-surface-variant);
+    font-weight: 500;
+  }
+
+  .monospaced-number {
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--on-surface);
+  }
 }

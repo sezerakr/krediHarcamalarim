@@ -4,6 +4,7 @@ import { logger } from "jsr:@hono/hono/logger";
 import { initializeDatabase } from "./src/db/client.ts";
 import authRoutes from "./src/routes/auth.ts";
 import statementsRoutes from "./src/routes/statements.ts";
+import predictionsRoutes from "./src/routes/predictions.ts";
 
 // Initialize the app
 const app = new Hono();
@@ -21,6 +22,7 @@ app.use(
 // ---- Routes ----
 app.route("/api/auth", authRoutes);
 app.route("/api/statements", statementsRoutes);
+app.route("/api/predictions", predictionsRoutes);
 
 // ---- Health check ----
 app.get("/", (c) => {
@@ -38,7 +40,12 @@ app.get("/", (c) => {
         upload: "POST /api/statements/upload",
         list: "GET /api/statements",
         detail: "GET /api/statements/:id",
+        transactions: "GET /api/statements/transactions",
+        recategorize: "POST /api/statements/recategorize",
         preview: "POST /api/statements/preview",
+      },
+      predictions: {
+        predict: "GET /api/predictions",
       },
     },
   });

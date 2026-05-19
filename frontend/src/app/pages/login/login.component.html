@@ -1,23 +1,35 @@
-<div class="auth-container">
-  <form (ngSubmit)="submit()" #f="ngForm" class="auth-form">
-    <h1>Giriş Yap</h1>
-
-    @if (errorMsg(); as e) { <p class="error">{{ e }}</p> }
-
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" name="email" [(ngModel)]="email" required />
-    </div>
-    
-    <div class="form-group">
-      <label>Şifre</label>
-      <input type="password" name="password" [(ngModel)]="password" required />
+<div class="auth-page">
+  <div class="auth-widget">
+    <div class="widget-header">
+      <h1>Giriş Yap</h1>
     </div>
 
-    <button type="submit" [disabled]="loading() || !f.form.valid">
-      {{ loading() ? 'Giriş yapılıyor…' : 'Giriş Yap' }}
-    </button>
+    <form (ngSubmit)="submit()" #f="ngForm" class="auth-form">
+      @if (errorMsg(); as e) { <div class="error-banner">{{ e }}</div> }
 
-    <a routerLink="/register" class="link">Hesabınız yok mu? Kayıt olun</a>
-  </form>
+      <div class="form-field">
+        <label>E-POSTA</label>
+        <input type="email" name="email" [(ngModel)]="email" placeholder="ornek@sirket.com" required />
+      </div>
+
+      <div class="form-field">
+        <div class="label-row">
+          <label>ŞİFRE</label>
+        </div>
+        <input type="password" name="password" [(ngModel)]="password" placeholder="••••••••" required />
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="loading() || !f.form.valid">
+        {{ loading() ? 'Giriş yapılıyor…' : 'Giriş Yap' }}
+      </button>
+    </form>
+
+    <div class="divider-row">
+      <div class="divider-line"></div>
+      <span>VEYA</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <a routerLink="/register" class="link-switch">Hesabınız yok mu? Kayıt olun</a>
+  </div>
 </div>

@@ -1,12 +1,21 @@
 <div class="page-header">
   <h1>Ekstrelerim</h1>
-  <a routerLink="/upload" class="upload-btn">Yeni Ekstre Yükle</a>
+  <a routerLink="/upload" class="btn-action">
+    <span class="material-symbols-outlined">add</span>
+    Yeni Ekstre Yükle
+  </a>
 </div>
 
 @if (statements.isLoading()) {
-  <div class="loading">Yükleniyor…</div>
+  <div class="loading-state">
+    <span class="material-symbols-outlined spin">progress_activity</span>
+    Yükleniyor…
+  </div>
 } @else if (statements.error()) {
-  <div class="error">Hata: ekstreler yüklenemedi.</div>
+  <div class="error-state">
+    <span class="material-symbols-outlined">error</span>
+    Hata: ekstreler yüklenemedi.
+  </div>
 } @else {
   <div class="table-container">
     <table>
@@ -22,23 +31,31 @@
       <tbody>
         @for (s of statements.value()?.statements ?? []; track s.id) {
           <tr>
-            <td>{{ s.fileName }}</td>
+            <td>
+              <div class="file-name-cell">
+                <span class="material-symbols-outlined">description</span>
+                {{ s.fileName }}
+              </div>
+            </td>
             <td><span class="badge bank">{{ s.bankName }}</span></td>
-            <td>{{ s.uploadedAt | date:'dd.MM.yyyy HH:mm' }}</td>
+            <td class="date-cell">{{ s.uploadedAt | date:'dd.MM.yyyy HH:mm' }}</td>
             <td>
               @switch (s.status) {
-                @case ('processed') { <span class="badge success">✅ İşlendi</span> }
-                @case ('processing') { <span class="badge warning">⏳ İşleniyor</span> }
-                @case ('pending') { <span class="badge warning">⏳ Bekliyor</span> }
-                @case ('failed') { <span class="badge danger">❌ Hata</span> }
+                @case ('processed') { <span class="badge success"><span class="material-symbols-outlined">check_circle</span> İşlendi</span> }
+                @case ('processing') { <span class="badge warning"><span class="material-symbols-outlined">pending</span> İşleniyor</span> }
+                @case ('pending') { <span class="badge warning"><span class="material-symbols-outlined">schedule</span> Bekliyor</span> }
+                @case ('failed') { <span class="badge danger"><span class="material-symbols-outlined">cancel</span> Hata</span> }
               }
             </td>
             <td>
-              <a [routerLink]="['/statements', s.id]" class="view-btn">Detay</a>
+              <a [routerLink]="['/statements', s.id]" class="view-link">
+                Detay
+                <span class="material-symbols-outlined">chevron_right</span>
+              </a>
             </td>
           </tr>
         } @empty {
-          <tr><td colspan="5" style="text-align: center; padding: 2rem;">Henüz ekstre yüklenmedi.</td></tr>
+          <tr><td colspan="5" class="empty-state">Henüz ekstre yüklenmedi.</td></tr>
         }
       </tbody>
     </table>

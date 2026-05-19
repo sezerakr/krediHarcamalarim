@@ -25,6 +25,7 @@ export const statements = sqliteTable("statements", {
   fileName: text("file_name").notNull(),
   bankName: text("bank_name").notNull(), // "ZİRAAT" | "PARAF"
   fileType: text("file_type").notNull(), // "PDF" | "XLSX" | "CSV"
+  fileHash: text("file_hash"), // SHA-256 hash for duplicate detection
   statementPeriod: text("statement_period"), // e.g. "2025-01"
   uploadedAt: text("uploaded_at")
     .notNull()
@@ -68,3 +69,20 @@ export type Statement = typeof statements.$inferSelect;
 export type NewStatement = typeof statements.$inferInsert;
 export type Transaction = typeof transactions.$inferSelect;
 export type NewTransaction = typeof transactions.$inferInsert;
+
+// ============================================================
+// Predictions cache table — stores LLM prediction results
+// ============================================================
+export const predictions = sqliteTable("predictions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  predictionData: text("prediction_data").notNull(), // JSON string
+  transactionCount: integer("transaction_count").notNull(), // cache key
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+export type Prediction = typeof predictions.$inferSelect;

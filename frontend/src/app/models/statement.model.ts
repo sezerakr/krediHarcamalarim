@@ -41,3 +41,20 @@ export interface UploadSummary {
     subscriptions: number;
   };
 }
+
+/** LLM Next Month Prediction */
+export interface CategoryPrediction {
+  category: string;
+  predictedAmount: number;
+  percentageChange: number;
+  trend: 'up' | 'down' | 'stable';
+}
+
+export interface PredictionResponse {
+  totalPredicted: number;
+  percentageChange: number;
+  trend: 'up' | 'down' | 'stable';
+  categories: CategoryPrediction[];
+  advice: string;
+  generatedAt: string;
+}

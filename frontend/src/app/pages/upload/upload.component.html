@@ -1,64 +1,141 @@
-<div class="upload-container">
-  <h1>Yeni Ekstre Yükle</h1>
-  
-  <div class="form-card">
-    <div class="form-group">
-      <label>Banka Seçimi</label>
-      <div class="radio-group">
-        <label class="radio-label">
-          <input type="radio" name="bank" [(ngModel)]="selectedBank" [value]="BANKS.ZIRAAT" />
-          Ziraat Bankası (PDF)
+<div class="upload-page">
+  <header class="upload-header">
+    <h1>Yeni İşlem</h1>
+  </header>
+
+  <form class="upload-form">
+    <!-- Bank Selection -->
+    <section class="form-section">
+      <div class="section-header">
+        <h2>Banka Seçin</h2>
+        <p>İşlem yapmak istediğiniz hesabı seçin. Yalnızca yetkilendirilmiş banka hesapları listelenmektedir.</p>
+      </div>
+
+      <div class="bank-options">
+        <label class="bank-option" [class.selected]="selectedBank() === BANKS.ZIRAAT">
+          <div class="bank-icon">
+            <span class="material-symbols-outlined">account_balance</span>
+          </div>
+          <div class="bank-info">
+            <div class="bank-name">Ziraat Bankası</div>
+            <div class="bank-format">FORMAT: PDF</div>
+          </div>
+          <input type="radio" name="bank" [value]="BANKS.ZIRAAT"
+                 [checked]="selectedBank() === BANKS.ZIRAAT"
+                 (change)="selectedBank.set(BANKS.ZIRAAT)" />
+          <div class="radio-indicator"></div>
         </label>
-        <label class="radio-label">
-          <input type="radio" name="bank" [(ngModel)]="selectedBank" [value]="BANKS.PARAF" />
-          Paraf (XLSX/CSV)
+
+        <label class="bank-option" [class.selected]="selectedBank() === BANKS.PARAF">
+          <div class="bank-icon">
+            <span class="material-symbols-outlined">credit_card</span>
+          </div>
+          <div class="bank-info">
+            <div class="bank-name">Paraf</div>
+            <div class="bank-format">FORMAT: XLSX / CSV</div>
+          </div>
+          <input type="radio" name="bank" [value]="BANKS.PARAF"
+                 [checked]="selectedBank() === BANKS.PARAF"
+                 (change)="selectedBank.set(BANKS.PARAF)" />
+          <div class="radio-indicator"></div>
         </label>
       </div>
-    </div>
+    </section>
 
-    <div class="drop-zone" 
-         [class.dragging]="isDragging()"
-         (dragover)="onDragOver($event)"
-         (dragleave)="onDragLeave($event)"
-         (drop)="onDrop($event)">
-      <div class="icon">📄</div>
-      <p>Dosyayı buraya sürükleyin veya seçmek için tıklayın</p>
-      <input type="file" #fileInput (change)="onFileSelect($event)" 
-             [accept]="selectedBank() === BANKS.ZIRAAT ? '.pdf' : '.xlsx,.csv'"
-             style="display: none" />
-      <button type="button" class="browse-btn" (click)="fileInput.click()">Dosya Seç</button>
-    </div>
+    <!-- File Upload -->
+    <section class="form-section">
+      <div class="section-header">
+        <h2>Dosya Yükle</h2>
+        <p>Seçtiğiniz bankaya ait hesap özetini veya dekontu yükleyin.</p>
+      </div>
 
-    @if (selectedFile()) {
-      <div class="file-info">
-        <strong>Seçilen Dosya:</strong> {{ selectedFile()?.name }}
-        <button type="button" class="remove-btn" (click)="selectedFile.set(null)">✕</button>
+      <div class="drop-zone"
+           [class.dragging]="isDragging()"
+           [class.has-file]="selectedFiles().length > 0"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event)">
+
+        @if (selectedFiles().length === 0) {
+          <div class="drop-content">
+            <div class="drop-icon">
+              <span class="material-symbols-outlined">upload_file</span>
+            </div>
+            <h3>Dosyaları seçmek için tıklayın veya sürükleyin</h3>
+            <p class="drop-formats">DESTEKLENEN FORMATLAR: PDF, CSV (Çoklu seçim desteklenir)</p>
+          </div>
+        } @else {
+          <div class="file-selected" style="flex-direction: column; gap: 8px;">
+            @for (file of selectedFiles(); track file.name; let idx = $index) {
+              <div class="file-chip" style="width: 100%; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="material-symbols-outlined">description</span>
+                  <span class="file-name">{{ file.name }}</span>
+                </div>
+                <button type="button" class="remove-file" (click)="removeFile(idx); $event.stopPropagation()">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <input type="file" #fileInput (change)="onFileSelect($event)" multiple
+               [accept]="selectedBank() === BANKS.ZIRAAT ? '.pdf' : '.xlsx,.csv'"
+               style="display: none" />
+        <div class="drop-click-overlay" (click)="fileInput.click()"></div>
+      </div>
+    </section>
+
+    @if (errorMsg(); as e) {
+      <div class="error-msg">
+        <span class="material-symbols-outlined">error</span>
+        {{ e }}
       </div>
     }
-
-    @if (errorMsg(); as e) { <div class="error-msg">{{ e }}</div> }
 
     @if (uploadProgress() > 0 && uploadProgress() < 100) {
-      <div class="progress-bar">
-        <div class="fill" [style.width.%]="uploadProgress()"></div>
+      <div class="progress-wrapper">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+        </div>
+        <span class="progress-text">%{{ uploadProgress() }} Yükleniyor...</span>
       </div>
-      <div class="progress-text">%{{ uploadProgress() }} Yükleniyor...</div>
     }
 
-    <button class="submit-btn" [disabled]="!selectedFile() || uploading()" (click)="upload()">
-      {{ uploading() ? 'İşleniyor...' : 'Yükle ve İşle' }}
-    </button>
-  </div>
+    <!-- Submit -->
+    <div class="form-actions">
+      <button type="button" class="btn-submit" [disabled]="selectedFiles().length === 0 || uploading()" (click)="upload()">
+        {{ uploading() ? 'İşleniyor...' : 'İŞLEMLERİ BAŞLAT' }}
+      </button>
+    </div>
+  </form>
 
-  @if (summary(); as s) {
-    <div class="success-card">
-      <h3>✅ {{ s.message }}</h3>
-      <div class="stats">
-        <div class="stat"><span class="label">İşlem Sayısı:</span> <strong>{{ s.transactionCount }}</strong></div>
-        <div class="stat"><span class="label">Toplam Gider:</span> <strong>{{ s.summary.totalExpense }} ₺</strong></div>
-        <div class="stat"><span class="label">Toplam Gelir:</span> <strong>{{ s.summary.totalIncome }} ₺</strong></div>
-      </div>
-      <button class="view-btn" (click)="goToStatement(s.statementId)">Detayları Görüntüle</button>
+  @if (summaries().length > 0) {
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      @for (s of summaries(); track s.statementId) {
+        <div class="success-card">
+          <div class="success-icon">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <h3>{{ s.message }}</h3>
+          <div class="success-stats">
+            <div class="stat-row">
+              <span class="stat-label">İşlem Sayısı</span>
+              <span class="stat-value monospaced-number">{{ s.transactionCount }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Toplam Gider</span>
+              <span class="stat-value monospaced-number">{{ s.summary.totalExpense | currency:'TRY':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Toplam Gelir</span>
+              <span class="stat-value monospaced-number">{{ s.summary.totalIncome | currency:'TRY':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+          <button class="btn-view" (click)="goToStatement(s.statementId)">Detayları Görüntüle</button>
+        </div>
+      }
     </div>
   }
 </div>

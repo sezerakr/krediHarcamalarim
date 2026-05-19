@@ -13,4 +13,5 @@ export class SummaryCardComponent {
   readonly label = input.required<string>();
   readonly value = input.required<number>();
   readonly isCurrency = input<boolean>(false);
+  readonly icon = input<string>('account_balance');
 }

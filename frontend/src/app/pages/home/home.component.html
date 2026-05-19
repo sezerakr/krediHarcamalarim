@@ -1,28 +1,128 @@
-<div class="hero-section">
+<section class="hero-section">
   <div class="hero-content">
-    <h1>Kredi Harcamalarınızı Akıllıca Yönetin</h1>
-    <p>Banka ekstrelerinizi yükleyin, harcamalarınızı kategorize edelim ve aylık finansal durumunuzu grafiklerle detaylıca analiz edelim.</p>
-    <a routerLink="/register" class="cta-btn">Hemen Ücretsiz Başla</a>
+    <div class="hero-badge">
+      <span class="material-symbols-outlined">trending_up</span>
+      <span>Akıllı Finansal Yönetim</span>
+    </div>
+    <h1>Finansal Geleceğinizi Vizyonlayın</h1>
+    <p>Tüm kartlarınızı tek bir güvenli panelde takip edin, harcamalarınızı analiz edin ve yapay zeka destekli öngörülerle gelecek ayki nakit akışınızı şimdiden planlayın.</p>
+    <div class="hero-actions">
+      <a routerLink="/register" class="btn-primary">
+        Hemen Başlayın
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </a>
+      <a href="#features" class="btn-ghost">Nasıl Çalışır?</a>
+    </div>
   </div>
-</div>
+  <div class="hero-visual">
+    <div class="blur-bg"></div>
+    <div class="mockup-card card-1">
+      <div class="mockup-header">
+        <span class="mockup-label">Toplam Varlık</span>
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+      </div>
+      <div class="mockup-value monospaced-number">₺142,500</div>
+      <div class="mockup-trend">
+        <span class="material-symbols-outlined">arrow_upward</span>
+        %4.2 bu ay
+      </div>
+    </div>
+    <div class="mockup-card card-2">
+      <div class="mockup-header">
+        <span class="mockup-label">Gelecek Ay Tahmini</span>
+        <span class="material-symbols-outlined">insights</span>
+      </div>
+      <div class="mockup-bars">
+        <div class="bar" style="height: 50%;"></div>
+        <div class="bar" style="height: 75%;"></div>
+        <div class="bar" style="height: 66%;"></div>
+        <div class="bar bar-active" style="height: 100%;">
+          <span class="bar-label monospaced-number">₺12,400</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<div class="features-section">
-  <h2>Neden Kredi Harcamalarım?</h2>
+<section class="showcase-section">
+  <div class="showcase-heading">
+    <h2>Verilerinizle Geleceği Görün</h2>
+    <p>Karmaşık tabloları unutun. HARCAMAM, verilerinizi anlamlı, şık ve okunabilir grafiklere dönüştürerek size net bir resim sunar.</p>
+  </div>
+  <div class="showcase-grid">
+    <div class="showcase-card">
+      <div class="showcase-card-header">
+        <div>
+          <h3>Aylık Kullanım</h3>
+          <p>Kategori bazlı harcama dağılımınız</p>
+        </div>
+        <button class="icon-btn"><span class="material-symbols-outlined">more_vert</span></button>
+      </div>
+      <div class="usage-bars">
+        <div class="usage-row">
+          <span class="usage-label">Market</span>
+          <div class="usage-track"><div class="usage-fill" style="width: 45%; background: var(--primary-container);"></div></div>
+          <span class="usage-value monospaced-number">₺4,200</span>
+        </div>
+        <div class="usage-row">
+          <span class="usage-label">Faturalar</span>
+          <div class="usage-track"><div class="usage-fill" style="width: 30%; background: var(--secondary);"></div></div>
+          <span class="usage-value monospaced-number">₺2,800</span>
+        </div>
+        <div class="usage-row">
+          <span class="usage-label">Eğlence</span>
+          <div class="usage-track"><div class="usage-fill" style="width: 15%; background: var(--outline);"></div></div>
+          <span class="usage-value monospaced-number">₺1,400</span>
+        </div>
+        <div class="usage-row">
+          <span class="usage-label">Ulaşım</span>
+          <div class="usage-track"><div class="usage-fill" style="width: 10%; background: var(--outline-variant);"></div></div>
+          <span class="usage-value monospaced-number">₺900</span>
+        </div>
+      </div>
+    </div>
+    <div class="showcase-card prediction-card">
+      <div class="showcase-card-header">
+        <div>
+          <h3>Gelecek Ay Harcama Tahmini</h3>
+          <p>Yapay zeka modelimizin öngörüsü</p>
+        </div>
+        <span class="material-symbols-outlined ai-badge">auto_awesome</span>
+      </div>
+      <div class="prediction-content">
+        <div class="prediction-amount monospaced-number">₺11,500</div>
+        <div class="prediction-trend">
+          <span class="material-symbols-outlined">arrow_downward</span>
+          Geçen aya göre %8 daha az
+        </div>
+        <p class="prediction-desc">Düzenli harcamalarınız ve mevsimsel trendler incelenerek oluşturulmuştur. Tasarruf hedefinize ulaşmak için mükemmel bir fırsat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features-section" id="features">
   <div class="features-grid">
     <div class="feature-card">
-      <div class="icon">📊</div>
-      <h3>Detaylı Analiz</h3>
-      <p>Harcamalarınızı kategori bazında grafiklerle inceleyerek bütçenizi kontrol altına alın.</p>
+      <div class="feature-icon">
+        <span class="material-symbols-outlined">pie_chart</span>
+      </div>
+      <h3>Detaylı Aylık Kullanım</h3>
+      <p>Tüm kart ve hesaplarınızdaki hareketleri otomatik olarak kategorize edin. Paranızın tam olarak nereye gittiğini görselleştirilmiş grafiklerle saniyeler içinde anlayın.</p>
+    </div>
+    <div class="feature-card highlight">
+      <div class="feature-icon sage">
+        <span class="material-symbols-outlined">query_stats</span>
+      </div>
+      <h3>Akıllı Tahminler</h3>
+      <p>Geçmiş verilerinizi analiz eden algoritmamız, yaklaşan faturaları ve muhtemel harcamaları öngörerek sizi sürprizlerden korur.</p>
     </div>
     <div class="feature-card">
-      <div class="icon">📄</div>
-      <h3>PDF & Excel Desteği</h3>
-      <p>Ziraat Bankası (PDF) ve Paraf (Excel) ekstrelerinizi tek tıkla yükleyip anında işleyin.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon">🔒</div>
-      <h3>Güvenli ve Hızlı</h3>
-      <p>Verileriniz sadece sizin kontrolünüzde. Tüm işlemler modern teknolojilerle saniyeler içinde gerçekleşir.</p>
+      <div class="feature-icon">
+        <span class="material-symbols-outlined">lock</span>
+      </div>
+      <h3>Güvenli Bağlantı</h3>
+      <p>Banka düzeyinde 256-bit şifreleme ve salt okunur erişim ile verileriniz tamamen güvende. Biz sadece analiz ederiz, işlem yapmayız.</p>
     </div>
   </div>
-</div>
+</section>

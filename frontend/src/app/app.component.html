@@ -1,25 +1,95 @@
-<nav class="navbar">
-  <div class="nav-container">
-    <a routerLink="/" class="nav-brand">
-      <span class="icon">💸</span> Kredi Harcamalarım
-    </a>
-    <div class="nav-links">
-      @if (auth.isLoggedIn()) {
-        <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-item">Dashboard</a>
-        <a routerLink="/upload" routerLinkActive="active-link" class="nav-item">Yükle</a>
-        <a routerLink="/statements" routerLinkActive="active-link" class="nav-item">Ekstreler</a>
-        <div class="divider"></div>
-        <div class="user-menu">
-          <span class="user-greeting">Merhaba, {{ auth.currentUser()?.name?.split(' ')?.[0] ?? 'Kullanıcı' }}</span>
-          <button class="btn-logout" (click)="auth.logout()">Çıkış</button>
+<!-- PUBLIC NAVBAR (shown when NOT logged in) -->
+@if (!auth.isLoggedIn()) {
+  <nav class="top-navbar">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a routerLink="/" class="brand">HARCAMAM</a>
+        <div class="nav-links-desktop">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Ana Sayfa</a>
         </div>
-      } @else {
-        <a routerLink="/login" class="nav-item login-link">Giriş Yap</a>
+      </div>
+      <div class="nav-right">
+        <a routerLink="/login" class="nav-link-text">Giriş Yap</a>
         <a routerLink="/register" class="btn-register">Kayıt Ol</a>
-      }
+      </div>
     </div>
-  </div>
-</nav>
-<main class="container">
-  <router-outlet></router-outlet>
-</main>
+  </nav>
+  <main class="public-main">
+    <router-outlet></router-outlet>
+  </main>
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-brand">HARCAMAM</div>
+    <div class="footer-links">
+      <a href="#">Hakkımızda</a>
+      <a href="#">Gizlilik Politikası</a>
+      <a href="#">Kullanım Koşulları</a>
+      <a href="#">Destek</a>
+    </div>
+    <div class="footer-copy">© 2024 HARCAMAM. Tüm hakları saklıdır.</div>
+  </footer>
+}
+
+<!-- AUTHENTICATED TOPBAR LAYOUT (shown when logged in) -->
+@if (auth.isLoggedIn()) {
+  <!-- Mobile Top Bar -->
+  <header class="mobile-topbar">
+    <a routerLink="/dashboard" class="brand-mobile" style="text-decoration:none">HARCAMAM</a>
+    <button class="btn-logout-mobile" (click)="auth.logout()">
+      <span class="material-symbols-outlined">logout</span>
+    </button>
+  </header>
+
+  <!-- Desktop Top Bar -->
+  <nav class="top-navbar auth-topbar d-none d-md-block">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a routerLink="/dashboard" class="brand">HARCAMAM</a>
+        <div class="nav-links-desktop">
+          <a routerLink="/dashboard" routerLinkActive="active">
+            <span class="material-symbols-outlined">bar_chart</span>
+            Dashboard
+          </a>
+          <a routerLink="/upload" routerLinkActive="active">
+            <span class="material-symbols-outlined">add_circle</span>
+            Yeni İşlem
+          </a>
+          <a routerLink="/statements" routerLinkActive="active">
+            <span class="material-symbols-outlined">receipt_long</span>
+            Ekstreler
+          </a>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="user-profile-nav">
+          <span class="material-symbols-outlined user-icon">person</span>
+          <span class="user-name">{{ auth.currentUser()?.name ?? 'Kullanıcı' }}</span>
+        </div>
+        <button class="btn-logout-icon" (click)="auth.logout()" title="Çıkış Yap">
+          <span class="material-symbols-outlined">logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="auth-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-bottomnav d-md-none">
+    <a routerLink="/dashboard" routerLinkActive="active">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="label">Dash</span>
+    </a>
+    <a routerLink="/upload" routerLinkActive="active">
+      <span class="material-symbols-outlined">upload_file</span>
+      <span class="label">Yükle</span>
+    </a>
+    <a routerLink="/statements" routerLinkActive="active">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span class="label">Ekstre</span>
+    </a>
+  </nav>
+}
