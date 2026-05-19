@@ -55,4 +55,4 @@ app.get("/api/", (c) => {
 await initializeDatabase();
 
 Deno.serve({ port: 3005 }, app.fetch);
-console.log("🔥 Kredi Harcamalarım API running on http://localhost:3000");
+console.log("🔥 Kredi Harcamalarım API running on http://localhost:3005");
