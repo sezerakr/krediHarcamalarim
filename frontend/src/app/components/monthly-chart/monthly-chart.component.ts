@@ -37,8 +37,8 @@ export class MonthlyChartComponent implements AfterViewInit, OnDestroy {
         datasets: [{
           label: 'Harcamalar',
           data: this.data().map(b => b.total),
-          backgroundColor: '#1c1b1b',
-          hoverBackgroundColor: '#476550',
+          backgroundColor: '#476550',
+          hoverBackgroundColor: '#83a38d',
           borderRadius: 6,
           borderSkipped: false,
         }],
@@ -61,8 +61,8 @@ export class MonthlyChartComponent implements AfterViewInit, OnDestroy {
           }
         },
         scales: {
-          x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
-          y: { grid: { color: '#e2e3e1' }, ticks: { font: { family: 'JetBrains Mono', size: 11 } } }
+          x: { grid: { display: false }, ticks: { color: '#888888', font: { family: 'Inter', size: 11 } } },
+          y: { grid: { color: 'rgba(150, 150, 150, 0.15)' }, ticks: { color: '#888888', font: { family: 'JetBrains Mono', size: 11 } } }
         }
       },
     });

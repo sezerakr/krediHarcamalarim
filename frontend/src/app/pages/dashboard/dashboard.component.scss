@@ -170,7 +170,7 @@
     font-size: 12px;
     font-weight: 600;
 
-    &.down { background: rgba(71, 101, 80, 0.1); color: var(--secondary); }
+    &.down { background: color-mix(in srgb, var(--secondary) 10%, transparent); color: var(--secondary); }
     &.up { background: var(--error-container); color: var(--error); }
     .material-symbols-outlined { font-size: 16px; }
   }
@@ -220,7 +220,7 @@
   align-items: flex-start;
   gap: 12px;
   padding: 16px 20px;
-  background: rgba(71, 101, 80, 0.06);
+  background: color-mix(in srgb, var(--secondary) 6%, transparent);
   border-radius: 12px;
   border-left: 4px solid var(--secondary);
 
@@ -433,7 +433,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: color-mix(in srgb, var(--primary) 45%, transparent);
   backdrop-filter: blur(4px);
   z-index: 1050;
   animation: fadeIn 0.2s ease;
@@ -540,4 +540,44 @@
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(24px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---- Responsive Fixes ---- */
+@media (max-width: 768px) {
+  .tx-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .tx-fixed-table {
+    .col-bank, .col-cat { display: none; }
+    th:nth-child(2), th:nth-child(4),
+    td:nth-child(2), td:nth-child(4) {
+      display: none;
+    }
+    .col-amount { width: 100px; }
+    .col-date { width: 100px; }
+  }
+
+  .prediction-card, .chart-panel {
+    padding: 16px;
+  }
+
+  .prediction-main .prediction-amount .amount {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 576px) {
+  .detail-modal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px;
+    
+    .detail-modal-summary {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
 }

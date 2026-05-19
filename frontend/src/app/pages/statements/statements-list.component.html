@@ -1,10 +1,23 @@
 <div class="page-header">
   <h1>Ekstrelerim</h1>
-  <a routerLink="/upload" class="btn-action">
-    <span class="material-symbols-outlined">add</span>
-    Yeni Ekstre Yükle
-  </a>
+  <div class="header-actions">
+    <button class="btn-secondary" (click)="recategorize()" [disabled]="isRecategorizing()">
+      <span class="material-symbols-outlined" [class.spin]="isRecategorizing()">magic_button</span>
+      {{ isRecategorizing() ? 'Düzenleniyor...' : 'Otomatik Kategorize Et' }}
+    </button>
+    <a routerLink="/upload" class="btn-action">
+      <span class="material-symbols-outlined">add</span>
+      Yeni Ekstre Yükle
+    </a>
+  </div>
 </div>
+
+@if (recategorizeMessage()) {
+  <div class="alert-info">
+    <span class="material-symbols-outlined">info</span>
+    {{ recategorizeMessage() }}
+  </div>
+}
 
 @if (statements.isLoading()) {
   <div class="loading-state">
@@ -48,10 +61,15 @@
               }
             </td>
             <td>
-              <a [routerLink]="['/statements', s.id]" class="view-link">
-                Detay
-                <span class="material-symbols-outlined">chevron_right</span>
-              </a>
+              <div class="action-buttons">
+                <a [routerLink]="['/statements', s.id]" class="view-link">
+                  Detay
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </a>
+                <button class="delete-btn" (click)="deleteStatement(s.id)" title="Sil">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
             </td>
           </tr>
         } @empty {

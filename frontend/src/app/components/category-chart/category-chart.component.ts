@@ -40,7 +40,7 @@ export class CategoryChartComponent implements AfterViewInit, OnDestroy {
           backgroundColor: this.data().map(s => s.color),
           hoverOffset: 8,
           borderWidth: 2,
-          borderColor: '#ffffff',
+          borderColor: 'transparent',
         }],
       },
       options: {
@@ -57,7 +57,7 @@ export class CategoryChartComponent implements AfterViewInit, OnDestroy {
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { font: { family: 'Inter', size: 11 }, padding: 16, usePointStyle: true, pointStyleWidth: 8 }
+            labels: { color: '#888888', font: { family: 'Inter', size: 11 }, padding: 16, usePointStyle: true, pointStyleWidth: 8 }
           },
           tooltip: {
             callbacks: {

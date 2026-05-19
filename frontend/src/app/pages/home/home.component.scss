@@ -18,10 +18,10 @@
   padding: 64px;
   margin-top: 32px;
   border-radius: 16px;
-  border: 1px solid rgba(196, 199, 199, 0.2);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 20%, transparent);
   overflow: hidden;
-  background: radial-gradient(circle at top right, rgba(198, 232, 205, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at bottom left, rgba(28, 27, 27, 0.06) 0%, transparent 40%);
+  background: radial-gradient(circle at top right, color-mix(in srgb, var(--secondary-container) 30%, transparent) 0%, transparent 40%),
+              radial-gradient(circle at bottom left, color-mix(in srgb, var(--primary-container) 15%, transparent) 0%, transparent 40%);
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -132,9 +132,9 @@
 
 .mockup-card {
   position: absolute;
-  background: rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.5);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 50%, transparent);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
@@ -182,7 +182,7 @@
     border-left: 4px solid var(--secondary);
     @media (max-width: 768px) { width: 220px; transform: rotate(2deg) translate(10px, -10px); }
 
-    .material-symbols-outlined { color: var(--primary-container); }
+    .material-symbols-outlined { color: var(--primary); }
   }
 }
 
@@ -251,9 +251,9 @@
 }
 
 .showcase-card {
-  background: rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.5);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 50%, transparent);
   border-radius: 16px;
   padding: 32px;
   display: flex;
@@ -332,7 +332,7 @@
 
 /* ---- Prediction Card ---- */
 .prediction-card {
-  background: rgba(244, 244, 242, 0.5) !important;
+  background: color-mix(in srgb, var(--surface-container-low) 50%, transparent) !important;
 }
 
 .prediction-content {
@@ -341,9 +341,9 @@
   align-items: center;
   text-align: center;
   padding: 24px;
-  border: 1px solid rgba(196, 199, 199, 0.3);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 30%, transparent);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.5);
+  background: color-mix(in srgb, var(--surface) 50%, transparent);
 
   .prediction-amount {
     font-size: 40px;
@@ -389,9 +389,9 @@
 }
 
 .feature-card {
-  background: rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(196, 199, 199, 0.3);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 30%, transparent);
   border-radius: 16px;
   padding: 32px;
   display: flex;
@@ -418,16 +418,16 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: rgba(28, 27, 27, 0.06);
+    background: color-mix(in srgb, var(--primary-container) 10%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 8px;
 
-    .material-symbols-outlined { font-size: 24px; color: var(--primary-container); }
+    .material-symbols-outlined { font-size: 24px; color: var(--primary); }
 
     &.sage {
-      background: rgba(71, 101, 80, 0.1);
+      background: color-mix(in srgb, var(--secondary) 15%, transparent);
       .material-symbols-outlined { color: var(--secondary); }
     }
   }

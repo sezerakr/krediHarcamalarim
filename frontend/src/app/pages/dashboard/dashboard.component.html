@@ -5,7 +5,11 @@
       <h2 class="fw-semibold mb-1">Finansal Özet</h2>
       <p class="text-muted small mb-0">Hoş geldiniz, harcama geçmişiniz ve tahminleriniz aşağıdadır.</p>
     </div>
-    <div class="col-auto">
+    <div class="col-auto d-flex gap-2">
+      <button class="btn-action" style="background: var(--surface-container); color: var(--on-surface); border: 1px solid var(--outline-variant);" (click)="exportToCsv()">
+        <span class="material-symbols-outlined">download</span>
+        Excel / CSV İndir
+      </button>
       <a routerLink="/upload" class="btn-action primary">
         <span class="material-symbols-outlined">add</span>
         Yeni İşlem

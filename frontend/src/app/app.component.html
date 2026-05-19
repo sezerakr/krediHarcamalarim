@@ -9,6 +9,9 @@
         </div>
       </div>
       <div class="nav-right">
+        <button class="btn-theme-toggle" (click)="toggleTheme()" [title]="isDarkMode() ? 'Açık Tema' : 'Koyu Tema'">
+          <span class="material-symbols-outlined">{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</span>
+        </button>
         <a routerLink="/login" class="nav-link-text">Giriş Yap</a>
         <a routerLink="/register" class="btn-register">Kayıt Ol</a>
       </div>
@@ -35,9 +38,14 @@
   <!-- Mobile Top Bar -->
   <header class="mobile-topbar">
     <a routerLink="/dashboard" class="brand-mobile" style="text-decoration:none">HARCAMAM</a>
-    <button class="btn-logout-mobile" (click)="auth.logout()">
-      <span class="material-symbols-outlined">logout</span>
-    </button>
+    <div class="mobile-actions">
+      <button class="btn-theme-toggle mobile" (click)="toggleTheme()">
+        <span class="material-symbols-outlined">{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</span>
+      </button>
+      <button class="btn-logout-mobile" (click)="auth.logout()">
+        <span class="material-symbols-outlined">logout</span>
+      </button>
+    </div>
   </header>
 
   <!-- Desktop Top Bar -->
@@ -61,6 +69,9 @@
         </div>
       </div>
       <div class="nav-right">
+        <button class="btn-theme-toggle" (click)="toggleTheme()" [title]="isDarkMode() ? 'Açık Tema' : 'Koyu Tema'">
+          <span class="material-symbols-outlined">{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</span>
+        </button>
         <div class="user-profile-nav">
           <span class="material-symbols-outlined user-icon">person</span>
           <span class="user-name">{{ auth.currentUser()?.name ?? 'Kullanıcı' }}</span>

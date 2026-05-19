@@ -298,6 +298,37 @@ statementsRouter.get("/:id", async (c) => {
 });
 
 // ============================================================
+// DELETE /api/statements/:id — delete a statement and its transactions
+// ============================================================
+statementsRouter.delete("/:id", async (c) => {
+  const userId = c.get("userId");
+  const statementId = parseInt(c.req.param("id"));
+
+  // Check if statement exists and belongs to user
+  const [statement] = await db
+    .select()
+    .from(statements)
+    .where(and(eq(statements.id, statementId), eq(statements.userId, userId)))
+    .limit(1);
+
+  if (!statement) {
+    return c.json({ error: "Ekstre bulunamadı veya silme yetkiniz yok" }, 404);
+  }
+
+  try {
+    // Delete transactions first (if no cascade)
+    await db.delete(transactions).where(eq(transactions.statementId, statementId));
+    // Delete statement
+    await db.delete(statements).where(eq(statements.id, statementId));
+
+    return c.json({ message: "Ekstre başarıyla silindi" }, 200);
+  } catch (err) {
+    console.error("❌ Statement delete error:", err);
+    return c.json({ error: "Ekstre silinirken bir hata oluştu" }, 500);
+  }
+});
+
+// ============================================================
 // POST /api/statements/preview — preview parsing pipeline
 // (Useful for debugging: shows what will be sent to Gemini)
 // ============================================================

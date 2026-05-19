@@ -276,4 +276,38 @@ export class DashboardComponent {
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages()) this.currentPage.set(page);
   }
+
+  exportToCsv() {
+    const txs = this.tableTransactions();
+    if (txs.length === 0) {
+      alert('Dışa aktarılacak işlem bulunamadı.');
+      return;
+    }
+
+    // CSV Headers
+    const headers = ['Tarih', 'Banka', 'İşlem Tipi', 'Kategori', 'Açıklama', 'Tutar'];
+    
+    // CSV Rows
+    const rows = txs.map(tx => {
+      return [
+        tx.transactionDate,
+        tx.bankName,
+        tx.transactionType === 'INCOME' ? 'Gelir' : 'Gider',
+        tx.category ?? 'Diğer',
+        `"${(tx.cleanName || tx.rawDescription).replace(/"/g, '""')}"`,
+        tx.amount.toString().replace('.', ',')
+      ].join(';');
+    });
+
+    const csvContent = [headers.join(';'), ...rows].join('\n');
+    
+    // Create Blob and trigger download (UTF-8 with BOM for Excel compatibility)
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `harcamalarim_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
 }

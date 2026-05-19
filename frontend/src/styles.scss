@@ -86,6 +86,46 @@
   --radius-full: 9999px;
 }
 
+body.dark-theme {
+  --background: #121212;
+  --surface: #1e1e1e;
+  --surface-dim: #141414;
+  --surface-container-lowest: #1e1e1e;
+  --surface-container-low: #252525;
+  --surface-container: #2a2a2a;
+  --surface-container-high: #333333;
+  --surface-container-highest: #3b3b3b;
+  --surface-variant: #3b3b3b;
+  --surface-tint: #a6a6a6;
+
+  --primary: #ffffff;
+  --on-primary: #000000;
+  --primary-container: #333333;
+  --on-primary-container: #cccccc;
+
+  --secondary: #659a72;
+  --on-secondary: #000000;
+  --secondary-container: #2c4232;
+  --on-secondary-container: #c6e8cd;
+
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+
+  --outline: #8e9190;
+  --outline-variant: #444746;
+  --on-surface: #e2e2e2;
+  --on-surface-variant: #c4c7c5;
+  --on-background: #e2e2e2;
+  --inverse-surface: #e2e2e2;
+  --inverse-on-surface: #2f3130;
+
+  --text-main: #e2e2e2;
+  --text-muted: #c4c7c5;
+  --border: #444746;
+}
+
 /* ---- Reset & Base ---- */
 *, *::before, *::after {
   box-sizing: border-box;
