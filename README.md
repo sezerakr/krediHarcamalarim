@@ -2,13 +2,6 @@
 
 Kredi Harcamalarım, kredi kartı ekstrelerinizi yükleyip analiz edebileceğiniz, harcamalarınızı kategorize edip geleceğe yönelik akıllı tahminler alabileceğiniz modern bir kişisel finans ve gösterge paneli uygulamasıdır.
 
-## Canlı Demo
-
-**Demo URL:** [http://btk.squadturkiye.com](http://btk.squadturkiye.com)  
-*(API İstekleri `/api` üzerinden yapılmaktadır)*
-
----
-
 ## Proje Mimarisi ve Yapısı
 
 
